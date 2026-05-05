@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      npm_tag:
+        description: "npm dist-tag to publish with"
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - next
+          - beta
+      confirm_publish:
+        description: "Type publish to confirm npm publishing"
+        required: true
+        type: string
+
+jobs:
+  publish:
+    if: ${{ inputs.confirm_publish == 'publish' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - name: Publish CLI
+        run: npm publish --provenance --access public --tag "$NPM_TAG" -w @eterna-hybrid-exchange/cli
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
+      - name: Publish OpenClaw plugin
+        run: npm publish --provenance --access public --tag "$NPM_TAG" -w @eterna-hybrid-exchange/openclaw-plugin
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
+      - name: Publish OpenClaw skill package
+        run: npm publish --provenance --access public --tag "$NPM_TAG" -w @eterna-hybrid-exchange/eterna-trading-skill
+        env:
+          NPM_TAG: ${{ inputs.npm_tag }}
+
+  confirmation-failed:
+    if: ${{ inputs.confirm_publish != 'publish' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Release not started: confirm_publish must be exactly 'publish'."
+          exit 1
