@@ -1,0 +1,26 @@
+{
+  "name": "eterna-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Canonical Eterna AI monorepo for CLI, MCP docs, and agent integrations",
+  "type": "module",
+  "workspaces": [
+    "packages/cli",
+    "packages/openclaw-plugin",
+    "packages/openclaw-plugin/packages/skill"
+  ],
+  "scripts": {
+    "build": "npm run build -w @eterna-hybrid-exchange/cli",
+    "test": "npm run test -w @eterna-hybrid-exchange/cli",
+    "typecheck": "npm run typecheck -w @eterna-hybrid-exchange/cli",
+    "lint": "npm run lint -w @eterna-hybrid-exchange/cli",
+    "claims:check": "node scripts/check-stale-claims.mjs",
+    "version:check": "node scripts/check-versions.mjs",
+    "pack:check": "npm pack --dry-run -w @eterna-hybrid-exchange/openclaw-plugin && npm pack --dry-run -w @eterna-hybrid-exchange/eterna-trading-skill",
+    "verify": "npm run claims:check && npm run version:check && npm run lint && npm run typecheck && npm run test && npm run build && npm run pack:check"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
